@@ -1,0 +1,11 @@
+bluePi
+
+This program uses a Raspberry Pi computer as an A2DP Sink. It was originally
+developed for use as an audio solution for use in the car.
+
+
+--Version 1.0--
+bluePi works as a headless unit with no GUI. It performs device search and
+will automatically connect with trusted devices. bluePi works as a bluetooth
+agent which can pair and trust new devices but provides no meaningful method
+of device authentication.
