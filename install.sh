@@ -20,7 +20,16 @@ sudo apt-get -y upgrade
 
 # install dependencies
 echo 'Installing missing PulseAudio and Bluez dependencies
-sudo apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev libltdl-dev libsamplerate0-dev libsndfile1-dev libasound2-dev libavahi-client-dev libspeexdsp-dev liborc-0.4-dev intltool libtdb-dev libssl-dev libjson0-dev libsbc-dev libcap-dev
+# Below line is found in source document at top of file
+# sudo apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev libltdl-dev libsamplerate0-dev libsndfile1-dev libasound2-dev libavahi-client-dev libspeexdsp-dev liborc-0.4-dev intltool libtdb-dev libssl-dev libjson0-dev libsbc-dev libcap-dev
+
+# libjson0-dev has been deprecated in Raspbian Stretch
+# source: https://github.com/emersonmello/doorlock_raspberrypi/issues/1
+# Replacing libjson0-dev with libjson-c-dev
+sudo apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev libltdl-dev libsamplerate0-dev libsndfile1-dev libasound2-dev libavahi-client-dev libspeexdsp-dev liborc-0.4-dev intltool libtdb-dev libssl-dev libjson-c-dev libsbc-dev libcap-dev
+
+# removing problematic library
+sudo apt-get remove -y libpulse0
 
 # check if PulseAudio is installed
 pa_loc=$(which pulseaudio)
