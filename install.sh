@@ -96,12 +96,63 @@ fi
 # Client should have PulseAudio installed at this point
 # Create necessary groups whether or not PulseAudio installed for bluePi
 # Need to check for existing groups/users
-echo 'Creating pulse and audio users to run PulseAudio in system-wide mode
-sudo addgroup --system pulse
-sudo adduser --system --ingroup pulse --home /var/run/pulse pulse
-sudo addgroup --system pulse-access
-sudo adduser pulse audio
-echo 'Adding root to pulse-access group'
-sudo adduser root pulse-access
-	
+
+if [ -z $(cat /etc/group | grep 'pulse') ]
+then
+	echo "Creating pulse system group"
+	sudo addgroup --system pulse
+else
+	echo "pulse system group exists"
+	# What if pulse group is not system level?
+fi
+if [ -z $(cat /etc/passwd | grep 'pulse') ]
+then
+	echo "Creating pulse user"
+	sudo adduser --system --ingroup pulse --home /var/run/pulse pulse
+else
+	echo "pulse user already exists"
+fi
+if [ -z $(cat /etc/group | grep 'pulse-access') ]
+then
+	echo "Creating pulse-access group"
+	sudo addgroup --system pulse-access
+else
+	echo "pulse-access group already exists"
+fi
+if [ -z $(cat /etc/group | grep "audio.*pulse") ]
+then
+	echo "Adding user pulse to to group audio"
+	sudo adduser pulse audio
+else
+	echo "User pulse is already in group audio"
+fi
+if [ -z $(cat /etc/group | grep "pulse-access.*root") ]
+then
+	echo 'Adding root to pulse-access group'
+	sudo adduser root pulse-access
+else
+	echo "User root is alrady in group pulse-access"
+fi
+
+# Make a backup of the pulse daemon conf file
+sudo cp /etc/pulse/daemon.conf /etc/pulse/daemon.conf.bak
+
+# **BELOW COMMANDS NEED TESTING**
+# Use sed to reconfigure pulse audio daemon conf file
+cat /etc/pulse/daemon.conf | sed "s/resample-method = speex-float-3/; &\nresample-method = speex-fixed-3/"
+
+# Use sed to modify the pulse system.pa file
+cat /etc/pulse/system.pa | sed "s/load-module module-udev-detect/#&\n& tsched=0/"
+
+# Add code to load bluetooth-discover module
+echo "\n" >> /etc/pulse/system.pa
+echo "Below code added from source: https://www.raspberrypi.org/forums/viewtopic.php?p=619713#p619713" >> /etc/pulse/system.pa
+echo "### Automatically load driver modules for Bluetooth hardware" >> /etc/pulse/system.pa
+echo ".ifexists module-bluetooth-discover.so" >> /etc/pulse/system.pa
+echo "    load-module module-bluetooth-discover" >> /etc/pulse/system.pa
+echo "endif" >> /etc/pulse/system.pa
+
+echo "Finished instaling and configurng PulseAudio ${pa_ver_latest}"
+
+
 
