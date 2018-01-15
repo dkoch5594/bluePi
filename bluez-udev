@@ -4,9 +4,10 @@ name=$(sed 's/\"//g' <<< $NAME)
 #exit if not a BT address
 if [[ ! $name =~ ^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$ ]]; then exit 0;  fi
 
-audio_source=bluez_source.$(sed 's/:/_/g' <<< $name)
+#Added .a2dp_source suffix to match new naming convention
+audio_source=bluez_source.$(sed 's/:/_/g' <<< $name).a2dp_source
 
-action=$(expr "$ACTION" : "\([a-zA-Z]\+\).*")
+# Do comparison on $ACTION instead of $action
 if [ "$action" = "add" ]; then
     logger "[$(basename $0)] Bluetooth device is being added [$name]"
     logger "[$(basename $0)] Patching $audio_source into ALSA sink #$audio_sink"
