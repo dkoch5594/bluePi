@@ -1,6 +1,8 @@
 #!/bin/bash
+sleep 5
 audio_sink=0
 name=$(sed 's/\"//g' <<< $NAME)
+
 #exit if not a BT address
 if [[ ! $name =~ ^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$ ]]; then exit 0;  fi
 
@@ -13,7 +15,22 @@ if [ "$action" = "add" ]; then
     logger "[$(basename $0)] Patching $audio_source into ALSA sink #$audio_sink"
     # loop back this source to the default sink
     handle=$(pactl load-module module-loopback source=$audio_source sink=$audio_sink)
-    logger "[$(basename $0)] PulseAudio module-loopback returned handle [$handle]"
+    if [ -z $handle ]
+    then
+        logger "[$(basename $0)] Failed to load loopback module on sink $audio_sink"
+	audio_sink=1
+    	logger "[$(basename $0)] Patching $audio_source into ALSA sink #$audio_sink"
+        handle=$(pactl load-module module-loopback source=$audio_source sink=$audio_sink)
+	if [ -z $handle ]
+	then
+	    logger "[$(basename $0)] Failed to load loopback module on sink $audio_sink"
+	    logger "[$(basename $0)] Loopback module not loaded. Playback not possible."
+	else
+	    logger "[$(basename $0)] PulseAudio module-loopback returned handle [$handle]"
+	fi
+    else
+	logger "[$(basename $0)] PulseAudio module-loopback returned handle [$handle]"
+    fi
 fi
 
 if [ "$action" = "remove" ]; then
