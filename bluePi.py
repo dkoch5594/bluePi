@@ -24,7 +24,9 @@ IFACES = {"AGENT" : BLUEZ_SERVICE + ".Agent1",
 	"DEVICE" : BLUEZ_SERVICE + ".Device1",
 	"MEDIA_PLAYER" : BLUEZ_SERVICE + ".MediaPlayer1",
 	"MEDIA_TRANSPORT" : BLUEZ_SERVICE + ".MediaTransport1", 
-	"PROPERTIES" : FD_DBUS + ".Properties" }
+	"PROPERTIES" : FD_DBUS + ".Properties", 
+	"MODEM": OFONO_SERVICE + ".Modem", 
+	"OFONO_MANAGER" : OFONO_SERVICE + ".Manager" } 
 
 UUID_BASE = "-0000-1000-8000-00805f9b34fb"
 HSP_AG_UUID = "00001112" + UUID_BASE
@@ -37,6 +39,7 @@ class TestPlayer(dbus.service.Object):
 		# Initialize bus
 		self.bus = dbus.SystemBus()
 		self.untrusted_devices = []
+		
 		# Retrieve adapter, properties and interface
 		self.adapter_obj = self.getBusObject("ADAPTER")
 		self.adapter_props = dbus.Interface(self.adapter_obj, IFACES["PROPERTIES"])
@@ -85,6 +88,20 @@ class TestPlayer(dbus.service.Object):
 			device.Connect()
 			#device.ConnectProfile(HFP_HAG_UUID)
 			#device.ConnectProfile(A2DP_SOURCE_UUID)
+			
+			# Find Modem on device
+			modem = dbus.Interface(dev_obj, IFACES["MODEM"])
+			
+			# Turn Modem On
+			#modem.SetProperty("Powered", dbus.Boolean(1))
+
+			# Bring Modem online
+			#modem.SetProperty("Online", dbus.Boolean(1))
+
+			modem_props = modem.GetProperties()
+			for k,v in modem_props:
+				print "{}: {}".format(k,v)
+
 			success = True
 			return success
 		except dbus.exceptions.DBusException as ex:
